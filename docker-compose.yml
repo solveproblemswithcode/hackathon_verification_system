@@ -1,0 +1,19 @@
+# One command to run the prototype and share it over HTTPS without a domain:
+#
+#   docker compose up -d --build
+#   docker compose logs tunnel | grep trycloudflare.com
+#
+# The app itself is NOT published on a host port; the only way in is the tunnel.
+services:
+  app:
+    build: .
+    restart: unless-stopped
+
+  # Cloudflare "quick tunnel": no account, no domain. Prints a random
+  # https://<words>.trycloudflare.com URL that changes whenever this container restarts.
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --url http://app:3000
+    depends_on:
+      - app
